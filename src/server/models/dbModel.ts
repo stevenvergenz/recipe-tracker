@@ -1,14 +1,12 @@
+import { Client } from 'pg';
+
 /**
- * Base class for all 
+ * Base class for all database models
  */
-export default abstract class DbModel
+export interface DatabaseModel
 {
-	public id: number;
-
-	protected constructor(id: number)
-	{
-		this.id = id;
-	}
-
-	public abstract save(): Promise<void>;
+	create(client: Client): Promise<void>;
+	read(client: Client): Promise<void>;
+	update(client: Client): Promise<void>;
+	delete(client: Client): Promise<void>;
 }

@@ -4,8 +4,6 @@
 		"lib": [
 			"ES2021"
 		],
-		"strict": true,
-		"strictNullChecks": false,
-		"strictPropertyInitialization": false
+		"strict": true
 	}
 }
