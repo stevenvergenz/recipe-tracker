@@ -6,7 +6,7 @@ import { UserLike } from '../../common';
 
 export class UserModel implements DatabaseModel, UserLike
 {
-	public id: string = '';
+	public id: number = -1;
 	public email: string = '';
 	public password: Buffer = Buffer.alloc(0);
 	public salt: string = '';
@@ -23,7 +23,7 @@ export class UserModel implements DatabaseModel, UserLike
 	public async create(client: Client): Promise<void>
 	{
 		const query: QueryConfig = {
-			text: 'INSERT INTO Users(email, password, salt, name, lastLogin) ' +
+			text: 'INSERT INTO users (email, password, salt, name, last_login) ' +
 				'VALUES ($1, $2, $3, $4, $5)',
 			values: [this.email, this.password, this.salt, this.name, this.lastLogin]
 		};
@@ -37,15 +37,15 @@ export class UserModel implements DatabaseModel, UserLike
 	public async read(client: Client): Promise<void>
 	{
 		let query: QueryConfig;
-		if (this.id !== '') {
+		if (this.id) {
 			query = {
-				text: 'SELECT email, password, salt, name, lastLogin FROM Users WHERE id = $1',
+				text: 'SELECT email, password, salt, name, last_login FROM users WHERE id = $1',
 				values: [this.id]
 			};
 		}
-		else if (this.email !== '') {
+		else if (this.email) {
 			query = {
-				text: 'SELECT id, password, salt, name, lastLogin FROM Users WHERE email = $1',
+				text: 'SELECT id, password, salt, name, last_login FROM users WHERE email = $1',
 				values: [this.email]
 			};
 		}
@@ -64,7 +64,7 @@ export class UserModel implements DatabaseModel, UserLike
 	public async update(client: Client): Promise<void>
 	{
 		const query: QueryConfig = {
-			text: 'UPDATE Users SET email = $2, password = $3, salt = $4, name = $5, lastLogin = $6 ' +
+			text: 'UPDATE users SET email = $2, password = $3, salt = $4, name = $5, last_login = $6 ' +
 				'WHERE id = $1',
 			values: [this.id, this.email, this.password, this.salt, this.name, this.lastLogin]
 		};
@@ -78,7 +78,7 @@ export class UserModel implements DatabaseModel, UserLike
 	public async delete(client: Client): Promise<void>
 	{
 		const query: QueryConfig = {
-			text: 'DELETE FROM Users WHERE id = $1',
+			text: 'DELETE FROM users WHERE id = $1',
 			values: [this.id]
 		};
 
@@ -90,21 +90,27 @@ export class UserModel implements DatabaseModel, UserLike
 
 	//#endregion CRUD operations
 
+	public static getPasswordHash(password: string, salt: string): Buffer
+	{
+		const saltedPass = Buffer.from(`${salt}++${password}`, 'utf8');
+		const hash = createHash('sha256');
+		hash.update(saltedPass);
+		const passHash = hash.digest();
+		return passHash;
+	}
+
 	public static async logIn(client: Client, email: string, password: string): Promise<UserModel>
 	{
 		const user = new UserModel({ email });
 		await user.read(client);
 
-		const saltedPass = Buffer.from(user.salt + '++' + password, 'utf8');
-		const hash = createHash('sha256');
-		hash.update(saltedPass);
-		const passHash = hash.digest();
+		const passHash = UserModel.getPasswordHash(password, user.salt);
 
 		if (!user.password.equals(passHash)) {
 			throw new Error("Password invalid");
 		}
 
-		user.lastLogin = new Date();
+		user.lastLogin = new Date(Date.now());
 		await user.update(client);
 
 		return user;

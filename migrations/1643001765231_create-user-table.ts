@@ -35,5 +35,6 @@ export async function up(pgm: MigrationBuilder): Promise<void>
 		lastLogin: {
 			type: 'timestamp'
 		}
-	});
+	},
+	{ ifNotExists: true });
 }

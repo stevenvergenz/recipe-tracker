@@ -1,12 +1,15 @@
 import 'dotenv/config';
-import * as express from 'express';
+import express from 'express';
+import bodyParser from 'body-parser';
 
 import configureRoutes from './routes';
 
 const app = express();
+app.use(bodyParser.json());
+
 configureRoutes(app);
 
-app.use((req, res, next) => {
+app.use((req: express.Request) => {
 	console.log(req.url);
 });
 

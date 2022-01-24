@@ -1,5 +1,5 @@
 export interface UserLike {
-	id: string;
+	id: number;
 	email: string;
 	password: Buffer;
 	salt: string;

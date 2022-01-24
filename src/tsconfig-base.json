@@ -5,6 +5,7 @@
 			"ES2017"
 		],
 		"strict": true,
-		"declaration": true
+		"declaration": true,
+		"esModuleInterop": true
 	}
 }

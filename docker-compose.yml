@@ -7,7 +7,7 @@ services:
       PORT: 3000
       PGHOST: "db"
       PGUSER: "postgres"
-      PGPASSWORD: "recognition code 357"
+      PGPASSWORD: "supersecretpass"
       PGDATABASE: "postgres"
     ports:
       - "3000:3000"
@@ -22,7 +22,7 @@ services:
     networks:
       - internal
     environment:
-      POSTGRES_PASSWORD: "recognition code 357"
+      POSTGRES_PASSWORD: "supersecretpass"
     ports:
       - "5432:5432"
 networks:
