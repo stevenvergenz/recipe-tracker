@@ -1,0 +1,7 @@
+{
+	"host": "172.19.0.2",
+	"user": "postgres",
+	"password": "recognition code 257",
+	"database": "postgres",
+	"tsconfig": "src/server/tsconfig-node.json"
+}

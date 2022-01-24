@@ -1,0 +1,29 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+    environment:
+      PORT: 3000
+      PGHOST: "db"
+      PGUSER: "postgres"
+      PGPASSWORD: "recognition code 357"
+      PGDATABASE: "postgres"
+    ports:
+      - "3000:3000"
+    networks:
+      - internal
+    restart: unless-stopped
+    depends_on:
+      - "db"
+  db:
+    image: postgres
+    restart: always
+    networks:
+      - internal
+    environment:
+      POSTGRES_PASSWORD: "recognition code 357"
+    ports:
+      - "5432:5432"
+networks:
+  internal:

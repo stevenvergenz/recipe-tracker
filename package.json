@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc --build src/server/tsconfig-node.json",
+    "start": "node built/server/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +22,7 @@
     "@typescript-eslint/eslint-plugin": "^5.10.0",
     "@typescript-eslint/parser": "^5.10.0",
     "eslint": "^8.7.0",
+    "ts-node": "^10.4.0",
     "typescript": "^4.5.4"
   }
 }
