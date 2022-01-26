@@ -2,8 +2,68 @@ import { Request, Response, NextFunction } from 'express';
 import { PoolClient } from 'pg';
 import { randomBytes } from 'crypto';
 
-import { UserLike } from '../../common';
 import { dbPool, UserModel } from '../models';
+
+export async function authenticate(req: Request, res: Response): Promise<void>
+{
+	if (!req.body.email || !req.body.password) {
+		res.sendStatus(400);
+		return;
+	}
+	
+	let db: PoolClient;
+	try {
+		db = await dbPool.connect();
+	}
+	catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+		return;
+	}
+
+	const user = new UserModel({ email: req.body.email });
+	try {
+		await user.read(db);
+	}
+	catch (e) {
+		db.release();
+		res.sendStatus(401);
+		return;
+	}
+
+	const attemptPass = UserModel.getPasswordHash(req.body.password, user.salt);
+	if (!user.password.equals(attemptPass)) {
+		db.release();
+		res.sendStatus(401);
+		return;
+	}
+
+	user.lastLogin = new Date(Date.now());
+	await user.update(db);
+	db.release();
+	req.session['userId'] = user.id;
+	req.session.save();
+	res.cookie('username', user.name, { maxAge: 3600000 });
+	res.sendStatus(200);
+
+}
+
+export function logOut(req: Request, res: Response)
+{
+	req.session.destroy(() => res.sendStatus(200));
+}
+
+export async function ensureLogin(req: Request, res: Response, next: NextFunction): Promise<void>
+{
+	const userId: string = req.session['userId'];
+	if (!userId) {
+		res.sendStatus(401);
+		return;
+	}
+	else {
+		return next();
+	}
+}
 
 export async function create(req: Request, res: Response): Promise<void>
 {

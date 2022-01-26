@@ -4,6 +4,7 @@ import * as User from './controllers/user';
 
 export default function configureRoutes(app: Express)
 {
-	app.post('/api/users', User.create);
-	app.get('/api/users/:id', User.get);
+	app.post('/api/users/authenticate', User.authenticate);
+	app.post('/api/users/logout', User.logOut);
+	app.post('/api/users/register', User.create);
 }

@@ -5,6 +5,7 @@ services:
       context: .
     environment:
       PORT: 3000
+      COOKIE_SECRET: "placeholder-secret"
       PGHOST: "db"
       PGUSER: "postgres"
       PGPASSWORD: "supersecretpass"

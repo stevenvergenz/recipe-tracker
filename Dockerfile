@@ -11,6 +11,7 @@ RUN ["npm", "run", "build"]
 # runtime image
 FROM node:14-alpine AS runtime-image
 ENV PORT=3000
+ENV COOKIE_SECRET="placeholder"
 WORKDIR /opt/app
 
 COPY package*.json ./

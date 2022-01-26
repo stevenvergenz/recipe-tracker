@@ -98,21 +98,4 @@ export class UserModel implements DatabaseModel, UserLike
 		const passHash = hash.digest();
 		return passHash;
 	}
-
-	public static async logIn(client: Client, email: string, password: string): Promise<UserModel>
-	{
-		const user = new UserModel({ email });
-		await user.read(client);
-
-		const passHash = UserModel.getPasswordHash(password, user.salt);
-
-		if (!user.password.equals(passHash)) {
-			throw new Error("Password invalid");
-		}
-
-		user.lastLogin = new Date(Date.now());
-		await user.update(client);
-
-		return user;
-	}
 }
