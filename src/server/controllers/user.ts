@@ -38,25 +38,33 @@ export async function authenticate(req: Request, res: Response): Promise<void>
 		return;
 	}
 
-	user.lastLogin = new Date(Date.now());
-	await user.update(db);
+	await user.updateLastLogin(db);
 	db.release();
-	req.session['userId'] = user.id;
-	req.session.save();
-	res.cookie('username', user.name, { maxAge: 3600000 });
-	res.sendStatus(200);
 
+	if (!req.session) {
+		res.sendStatus(500);
+		return;
+	}
+	
+	req.session.userId = user.id;
+	req.session.save(() =>
+		res.status(200).json(user.toJSON()));
 }
 
 export function logOut(req: Request, res: Response)
 {
-	req.session.destroy(() => res.sendStatus(200));
+	if (req.session) {
+		req.session.destroy(() => 
+			res.sendStatus(200));
+	}
+	else {
+		res.sendStatus(200);
+	}
 }
 
 export async function ensureLogin(req: Request, res: Response, next: NextFunction): Promise<void>
 {
-	const userId: string = req.session['userId'];
-	if (!userId) {
+	if (!req.session?.userId) {
 		res.sendStatus(401);
 		return;
 	}
@@ -65,7 +73,7 @@ export async function ensureLogin(req: Request, res: Response, next: NextFunctio
 	}
 }
 
-export async function create(req: Request, res: Response): Promise<void>
+export async function register(req: Request, res: Response): Promise<void>
 {
 	if (!req.body?.email || !req.body?.password || !req.body?.name) {
 		res.sendStatus(400);
@@ -79,7 +87,6 @@ export async function create(req: Request, res: Response): Promise<void>
 
 	user.salt = randomBytes(20).toString('hex');
 	user.password = UserModel.getPasswordHash(req.body.password, user.salt);
-	user.lastLogin = new Date(Date.now());
 
 	let db: PoolClient;
 	try {
@@ -92,7 +99,6 @@ export async function create(req: Request, res: Response): Promise<void>
 
 	try {
 		await user.create(db);
-		await user.read(db);
 	} catch (e) {
 		console.error(e);
 		res.sendStatus(403);
@@ -101,12 +107,7 @@ export async function create(req: Request, res: Response): Promise<void>
 		db.release();
 	}
 
-	res.status(204).json({
-		id: user.id,
-		email: user.email,
-		name: user.name,
-		lastLogin: user.lastLogin
-	});
+	res.status(204).json(user.toJSON());
 }
 
 export async function get(req: Request, res: Response): Promise<void>
@@ -138,10 +139,5 @@ export async function get(req: Request, res: Response): Promise<void>
 		db.release();
 	}
 
-	res.json({
-		id: user.id,
-		email: user.email,
-		name: user.name,
-		lastLogin: user.lastLogin
-	});
+	res.json(user.toJSON());
 }

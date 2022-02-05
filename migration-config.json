@@ -4,5 +4,5 @@
 	"user": "postgres",
 	"password": "supersecretpass",
 	"database": "postgres",
-	"tsconfig": "src/server/tsconfig-node.json"
+	"tsconfig": "tsconfig.json"
 }

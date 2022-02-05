@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --build src/server/tsconfig-node.json",
+    "build": "tsc --build",
     "start": "node built/server/index.js",
     "migrate": "node-pg-migrate up -f migration-config.json"
   },
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
-    "@types/express-session": "^1.17.4",
+    "@types/express-session": "^1.17.0",
     "@types/node": "^17.0.10",
     "@types/pg": "^8.6.4",
     "@typescript-eslint/eslint-plugin": "^5.10.0",
