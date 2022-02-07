@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc --build",
-    "start": "node built/server/index.js",
+    "start": "node built/index.js",
     "migrate": "node-pg-migrate up -f migration-config.json"
   },
   "author": "",

@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import { MigrationBuilder, ColumnDefinitions, PgLiteral } from 'node-pg-migrate';
 
 export const shorthands: ColumnDefinitions = {
-	id: { type: 'integer', primaryKey: true, sequenceGenerated: { start: 1, increment: 1, precedence: 'ALWAYS' }},
+	id: { type: 'serial', primaryKey: true },
 	timestampNow: { type: 'timestamp', default: PgLiteral.create('NOW()') }
 };
 
@@ -50,7 +49,4 @@ export async function up(pgm: MigrationBuilder): Promise<void>
 			}
 		}
 	});
-}
-
-export async function down(pgm: MigrationBuilder): Promise<void> {
 }

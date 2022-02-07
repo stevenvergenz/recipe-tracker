@@ -9,10 +9,10 @@ export interface RecipePreview
 
 export interface RecipeLike extends RecipePreview
 {
-	ownerId: number;
+	owner_id: number;
 	owner?: UserLike;
 	body: string;
-	thumbnailId: string;
-	createdOn: Date;
-	updatedOn: Date;
+	thumbnail_id: string;
+	created_on: Date;
+	updated_on: Date;
 }

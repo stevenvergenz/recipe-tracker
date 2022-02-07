@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { NextFunction } from 'express';
 import session from 'express-session';
 import bodyParser from 'body-parser';
 
@@ -13,10 +13,11 @@ app.use(session({
 	saveUninitialized: false
 }));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use((req: express.Request) => {
+app.use((req: express.Request, res: express.Response, next: NextFunction) => {
 	console.log(req.url);
+	next();
 });
 
 configureRoutes(app);

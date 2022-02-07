@@ -3,8 +3,8 @@ export interface UserLike
 	id: number;
 	email: string;
 	name: string;
-	createdOn: Date;
-	lastLogin: Date;
+	created_on: Date;
+	last_login: Date;
 }
 
 export interface PrivateUserLike extends UserLike

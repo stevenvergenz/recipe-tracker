@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import { ClientBase as Client, QueryConfig } from 'pg';
 
 import { DatabaseModel } from '.';
-import { PrivateUserLike, UserLike } from '../../common';
+import { PrivateUserLike, UserLike } from '../common';
 
 export class UserModel implements DatabaseModel, PrivateUserLike
 {
@@ -11,16 +11,10 @@ export class UserModel implements DatabaseModel, PrivateUserLike
 	public password: Buffer = Buffer.alloc(0);
 	public salt: string = '';
 	public name: string = '';
+	public created_on: Date = new Date(0);
+	public last_login: Date = new Date(0);
 
-	private created_on: Date = new Date(0);
-	public get createdOn(): Date { return this.created_on; }
-	public set createdOn(value: Date) { this.created_on = value; }
-	
-	private last_login: Date = new Date(0);
-	public get lastLogin(): Date { return this.last_login; }
-	public set lastLogin(value: Date) { this.last_login = value; }
-
-	public constructor(data: Partial<PrivateUserLike>)
+	public constructor(data?: Partial<PrivateUserLike>)
 	{
 		Object.assign(this, data);
 	}
@@ -30,24 +24,23 @@ export class UserModel implements DatabaseModel, PrivateUserLike
 	public async create(client: Client): Promise<void>
 	{
 		const query: QueryConfig = {
-			text: 'INSERT INTO users (email, password, salt, name) ' +
-				'VALUES ($1, $2, $3, $4)',
+			text: 'INSERT INTO users (email, password, salt, name, created_on, last_login) ' +
+				'VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING id, created_on, last_login',
 			values: [this.email, this.password, this.salt, this.name]
 		};
 
-		const result = await client.query(query);
+		const result = await client.query<Partial<PrivateUserLike>>(query);
 		if (result.rowCount === 0) {
 			throw new Error("Failed to create new user record");
 		}
 
-		// TODO: get the auto-generated values during the INSERT
-		await this.read(client);
+		Object.assign(this, result.rows[0]);
 	}
 
 	public async read(client: Client): Promise<void>
 	{
 		let query: QueryConfig;
-		if (this.id) {
+		if (this.id > 0) {
 			query = {
 				text: 'SELECT email, password, salt, name, created_on, last_login FROM users WHERE id = $1',
 				values: [this.id]
@@ -103,17 +96,16 @@ export class UserModel implements DatabaseModel, PrivateUserLike
 	public async updateLastLogin(client: Client): Promise<void>
 	{
 		const query: QueryConfig = {
-			text: 'UPDATE users SET last_login = NOW() WHERE id = $1',
+			text: 'UPDATE users SET last_login = NOW() WHERE id = $1 RETURNING last_login',
 			values: [this.id]
 		};
 
-		const result = await client.query(query);
+		const result = await client.query<Partial<PrivateUserLike>>(query);
 		if (result.rowCount === 0) {
 			throw new Error("Failed to update last login");
 		}
 	
-		// TODO: get real value from DB
-		this.last_login = new Date(Date.now());
+		Object.assign(this, result.rows[0]);
 	}
 
 	public toJSON(): UserLike
@@ -122,8 +114,8 @@ export class UserModel implements DatabaseModel, PrivateUserLike
 			id: this.id,
 			email: this.email,
 			name: this.name,
-			createdOn: this.createdOn,
-			lastLogin: this.lastLogin
+			created_on: this.created_on,
+			last_login: this.last_login
 		};
 	}
 
